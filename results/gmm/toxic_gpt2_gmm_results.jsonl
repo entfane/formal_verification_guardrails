@@ -1,0 +1,10 @@
+{"K": 1, "K_type": "FULL", "precision": 0.553, "recall": 0.88, "f1": 0.68}
+{"K": 2, "K_type": "FULL", "precision": 0.594, "recall": 0.85, "f1": 0.70}
+{"K": 3, "K_type": "FULL", "precision": 0.632, "recall": 0.79, "f1": 0.702}
+{"K": 4, "K_type": "FULL", "precision": 0.636, "recall": 0.75, "f1": 0.688}
+{"K": 5, "K_type": "FULL", "precision": 0.673, "recall": 0.66, "f1": 0.667}
+{"K": 1, "K_type": "DIAG", "precision": 0.508, "recall": 0.96, "f1": 0.664}
+{"K": 2, "K_type": "DIAG", "precision": 0.505, "recall": 0.96, "f1": 0.662}
+{"K": 3, "K_type": "DIAG", "precision": 0.497, "recall": 0.95, "f1": 0.653}
+{"K": 4, "K_type": "DIAG", "precision": 0.497, "recall": 0.95, "f1": 0.653}
+{"K": 5, "K_type": "DIAG", "precision": 0.497, "recall": 0.95, "f1": 0.653}
