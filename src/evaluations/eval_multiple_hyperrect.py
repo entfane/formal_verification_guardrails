@@ -6,6 +6,7 @@ from hyperrectangles import compute_hyperrectangles
 from verifier import Verifier
 from datasets import load_dataset
 import os
+import json
 
 
 MIN_CLUSTER = 6
@@ -99,6 +100,8 @@ if __name__ == "__main__":
 
     construction_ds = construction_ds.filter(lambda ex: ex[args.label_col] == 1)
 
+    min_sizes = [10, 15, 20, 25, 30, 35, 40, 45, 50]
+
     # ── Embedding cache ───────────────────────────────────────────────────────
     cache_dir = ".embedding_cache"
     os.makedirs(cache_dir, exist_ok=True)
@@ -116,10 +119,6 @@ if __name__ == "__main__":
             args.input_col, args.output_col, args.batch_size, args.max_len
         )
         np.save(construction_cache, construction_embeddings)
-
-    hyperrectangles, align_matrices = compute_hyperrectangles(
-        construction_embeddings, min_cluster_size=args.min_cluster
-    )
 
     if os.path.exists(harmful_cache):
         harmful_emb = np.load(harmful_cache)
@@ -139,36 +138,30 @@ if __name__ == "__main__":
         )
         np.save(harmless_cache, harmless_emb)
 
-    harmful_inside,  harmful_outside  = count_inside(harmful_emb,  hyperrectangles, align_matrices)
-    harmless_inside, harmless_outside = count_inside(harmless_emb, hyperrectangles, align_matrices)
+    with open("new_results/multiple-hyperrect/toxic_llama_results.jsonl", 'w', encoding='utf-8') as f:
+        for min_cluster_size in min_sizes:
 
-    total_inside  = harmful_inside  + harmless_inside
-    total_outside = harmful_outside + harmless_outside
-    total_eval    = total_inside    + total_outside
+            hyperrectangles, align_matrices = compute_hyperrectangles(
+                construction_embeddings, min_cluster_size=min_cluster_size
+            )
 
-    tp = harmful_inside
-    fp = harmless_inside
-    fn = harmful_outside
+        
 
-    precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
-    recall    = tp / (tp + fn) if (tp + fn) > 0 else 0.0
-    f1        = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0.0
+            harmful_inside,  harmful_outside  = count_inside(harmful_emb,  hyperrectangles, align_matrices)
+            harmless_inside, harmless_outside = count_inside(harmless_emb, hyperrectangles, align_matrices)
 
-    print("\n" + "=" * 55)
-    print("  HYPERRECTANGLE CONTAINMENT RESULTS")
-    print(f"  ({len(hyperrectangles)} rectangle(s), union membership)")
-    print("=" * 55)
-    print(f"{'Category':<20} {'Inside':>8} {'Outside':>8} {'% Inside':>10}")
-    print("-" * 55)
-    print(f"{'Harmful  (label=1)':<20} {harmful_inside:>8} {harmful_outside:>8} "
-          f"{100 * harmful_inside  / len(eval_harmful_ds):>9.1f}%")
-    print(f"{'Harmless (label=0)':<20} {harmless_inside:>8} {harmless_outside:>8} "
-          f"{100 * harmless_inside / len(eval_harmless_ds):>9.1f}%")
-    print("-" * 55)
-    print(f"{'Total':<20} {total_inside:>8} {total_outside:>8} "
-          f"{100 * total_inside / total_eval:>9.1f}%")
-    print("=" * 55)
-    print(f"  Precision : {100 * precision:>6.1f}%")
-    print(f"  Recall    : {100 * recall:>6.1f}%")
-    print(f"  F1        : {100 * f1:>6.1f}%")
-    print("=" * 55)
+            total_inside  = harmful_inside  + harmless_inside
+            total_outside = harmful_outside + harmless_outside
+            total_eval    = total_inside    + total_outside
+
+            tp = harmful_inside
+            fp = harmless_inside
+            fn = harmful_outside
+
+            precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+            recall    = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+            f1        = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0.0
+            result = {"min_cluster_size": min_cluster_size, "num_hyperrectangles": len(hyperrectangles), "precision": precision, "recall": recall, "f1": f1}
+            jsonl_line = json.dumps(result) + "\n"
+            f.write(jsonl_line)
+

@@ -1,4 +1,4 @@
-{"min_cluster_size": 2, "num_hyperrectangles": 150, "precision": 0.0, "recall": 0.0, "f1": 0.0}
+{"min_cluster_size": 2, "num_hyperrectangles": 151, "precision": 0.0, "recall": 0.0, "f1": 0.0}
 {"min_cluster_size": 12, "num_hyperrectangles": 12, "precision": 0.0, "recall": 0.0, "f1": 0.0}
 {"min_cluster_size": 22, "num_hyperrectangles": 12, "precision": 0.0, "recall": 0.0, "f1": 0.0}
 {"min_cluster_size": 32, "num_hyperrectangles": 12, "precision": 0.0, "recall": 0.0, "f1": 0.0}
@@ -9,7 +9,7 @@
 {"min_cluster_size": 82, "num_hyperrectangles": 12, "precision": 0.0, "recall": 0.0, "f1": 0.0}
 {"min_cluster_size": 92, "num_hyperrectangles": 10, "precision": 1.0, "recall": 0.03, "f1": 0.058252427184466014}
 {"min_cluster_size": 102, "num_hyperrectangles": 8, "precision": 1.0, "recall": 0.12, "f1": 0.21428571428571425}
-{"min_cluster_size": 112, "num_hyperrectangles": 8, "precision": 1.0, "recall": 0.15, "f1": 0.2608695652173913}
+{"min_cluster_size": 112, "num_hyperrectangles": 8, "precision": 1.0, "recall": 0.14, "f1": 0.24561403508771928}
 {"min_cluster_size": 122, "num_hyperrectangles": 8, "precision": 1.0, "recall": 0.09, "f1": 0.16513761467889906}
 {"min_cluster_size": 132, "num_hyperrectangles": 8, "precision": 1.0, "recall": 0.11, "f1": 0.19819819819819817}
 {"min_cluster_size": 142, "num_hyperrectangles": 7, "precision": 1.0, "recall": 0.24, "f1": 0.3870967741935484}

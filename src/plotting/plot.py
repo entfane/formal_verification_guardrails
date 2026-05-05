@@ -13,14 +13,14 @@ def load_single(path):
 
 # ── load data ─────────────────────────────────────────────────────────────────
 
-bert_multi   = load_jsonl("results/multiple-hyperrect/toxic_bert_hyperrect_results.jsonl")
-gpt2_multi   = load_jsonl("results/multiple-hyperrect/toxic_gpt2_hyperrect_results.jsonl")
-bert_single  = load_single("results/single-hyperrect/toxic_bert_single_hyperrect_results.jsonl")
-gpt2_single  = load_single("results/single-hyperrect/toxic_gpt2_single_hyperrect_results.jsonl")
+bert_multi   = load_jsonl("new_results/multiple-hyperrect/toxic_bert_results.jsonl")
+gpt2_multi   = load_jsonl("new_results/multiple-hyperrect/toxic_gpt2_results.jsonl")
+bert_single  = load_single("new_results/single-hyperrect/toxic_bert_single_hyperrect_results.jsonl")
+gpt2_single  = load_single("new_results/single-hyperrect/toxic_gpt2_single_hyperrect_results.jsonl")
 
 # Load new Llama data
-llama_multi  = load_jsonl("results/multiple-hyperrect/toxic_llama_hyperrect_results.jsonl")
-llama_single = load_single("results/single-hyperrect/toxic_llama_single_hyperrect_results.jsonl")
+llama_multi  = load_jsonl("new_results/multiple-hyperrect/toxic_llama_results.jsonl")
+llama_single = load_single("new_results/single-hyperrect/toxic_llama_single_hyperrect_results.jsonl")
 
 # ── colours & config ──────────────────────────────────────────────────────────
 

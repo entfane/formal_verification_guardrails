@@ -49,9 +49,9 @@ plt.rcParams.update({
 # ── load data ─────────────────────────────────────────────────────────────────
 
 files = {
-    "BERT":  "results/gmm/toxic_bert_gmm_results.jsonl",
-    "GPT-2": "results/gmm/toxic_gpt2_gmm_results.jsonl",
-    "Llama": "results/gmm/toxic_llama_gmm_results.jsonl",
+    "BERT":  "new_results/gmm/toxic_bert_results.jsonl",
+    "GPT-2": "new_results/gmm/toxic_gpt2_results.jsonl",
+    "Llama": "new_results/gmm/toxic_llama_results.jsonl",
 }
 
 # Load and preprocess all data beforehand to determine global x-limits

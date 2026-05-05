@@ -6,6 +6,7 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from sklearn.mixture import GaussianMixture
 from datasets import load_dataset
 from verifier import Verifier
+import json
 
 
 def get_classifier_head(model):
@@ -122,22 +123,6 @@ if __name__ == "__main__":
 
     verifier = Verifier(args.pooling)
 
-    if os.path.exists(construction_cache):
-        construction_embeddings = np.load(construction_cache)
-    else:
-        construction_embeddings = verifier.extract_embeddings(
-            construction_ds, classifier, tokenizer, args.pooling,
-            args.input_col, args.output_col, args.batch_size, args.max_len
-        )
-        np.save(construction_cache, construction_embeddings)
-    gmm, p5_threshold = fit_gmm_and_get_percentiles(
-        construction_embeddings, 
-        n_components=args.n_components, 
-        cov_type=args.cov_type,
-        seed=args.seed
-    )
-    
-
     if os.path.exists(harmful_cache):
         harmful_emb = np.load(harmful_cache)
     else:
@@ -156,36 +141,41 @@ if __name__ == "__main__":
         )
         np.save(harmless_cache, harmless_emb)
 
-    harmful_inside,  harmful_outside  = count_inside(harmful_emb,  gmm, p5_threshold)
-    harmless_inside, harmless_outside = count_inside(harmless_emb, gmm, p5_threshold)
+    if os.path.exists(construction_cache):
+        construction_embeddings = np.load(construction_cache)
+    else:
+        construction_embeddings = verifier.extract_embeddings(
+            construction_ds, classifier, tokenizer, args.pooling,
+            args.input_col, args.output_col, args.batch_size, args.max_len
+        )
+        np.save(construction_cache, construction_embeddings)
 
-    total_inside  = harmful_inside  + harmless_inside
-    total_outside = harmful_outside + harmless_outside
-    total_eval    = total_inside    + total_outside
+    with open("new_results/gmm/toxic_llama_results2.jsonl", 'w', encoding='utf-8') as f:
+        for cov_type in ["full", "diag"]:
+            for k in range(1, 6):
+                
+                gmm, p5_threshold = fit_gmm_and_get_percentiles(
+                    construction_embeddings, 
+                    n_components=k, 
+                    cov_type=cov_type,
+                    seed=args.seed
+                )
+                harmful_inside,  harmful_outside  = count_inside(harmful_emb,  gmm, p5_threshold)
+                harmless_inside, harmless_outside = count_inside(harmless_emb, gmm, p5_threshold)
 
-    tp = harmful_inside
-    fp = harmless_inside
-    fn = harmful_outside
+                total_inside  = harmful_inside  + harmless_inside
+                total_outside = harmful_outside + harmless_outside
+                total_eval    = total_inside    + total_outside
 
-    precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
-    recall    = tp / (tp + fn) if (tp + fn) > 0 else 0.0
-    f1        = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0.0
+                tp = harmful_inside
+                fp = harmless_inside
+                fn = harmful_outside
 
-    print("\n" + "=" * 60)
-    print("  GMM CONTAINMENT RESULTS")
-    print(f"  (Above 5% of construction log-likelihood)")
-    print("=" * 60)
-    print(f"{'Category':<20} {'Inside':>8} {'Outside':>8} {'% Inside':>10}")
-    print("-" * 60)
-    print(f"{'Harmful  (label=1)':<20} {harmful_inside:>8} {harmful_outside:>8} "
-          f"{100 * harmful_inside  / len(eval_harmful_ds):>9.1f}%")
-    print(f"{'Harmless (label=0)':<20} {harmless_inside:>8} {harmless_outside:>8} "
-          f"{100 * harmless_inside / len(eval_harmless_ds):>9.1f}%")
-    print("-" * 60)
-    print(f"{'Total':<20} {total_inside:>8} {total_outside:>8} "
-          f"{100 * total_inside / total_eval:>9.1f}%")
-    print("=" * 60)
-    print(f"  Precision : {100 * precision:>6.1f}%")
-    print(f"  Recall    : {100 * recall:>6.1f}%")
-    print(f"  F1        : {100 * f1:>6.1f}%")
-    print("=" * 60)
+                precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+                recall    = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+                f1        = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0.0
+                result = {"K": k, "K_type": cov_type.upper(), "precision": precision, "recall": recall, "f1": f1}
+                jsonl_line = json.dumps(result) + "\n"
+                f.write(jsonl_line)
+
+    

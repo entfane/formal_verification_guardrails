@@ -1,6 +1,0 @@
-{"K": 1, "K_type": "FULL", "precision": 0.713, "recall": 0.62, "f1": 0.663}
-{"K": 1, "K_type": "DIAG", "precision": 0.575, "recall": 0.96, "f1": 0.719}
-{"K": 2, "K_type": "DIAG", "precision": 0.588, "recall": 0.97, "f1": 0.732}
-{"K": 3, "K_type": "DIAG", "precision": 0.591, "recall": 0.97, "f1": 0.735}
-{"K": 4, "K_type": "DIAG", "precision": 0.588, "recall": 0.97, "f1": 0.732}
-{"K": 5, "K_type": "DIAG", "precision": 0.593, "recall": 0.96, "f1": 0.733}
