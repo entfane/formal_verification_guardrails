@@ -15,22 +15,18 @@ This repository provides a framework that closes this gap by shifting verificati
     *   **Gaussian Mixture Models (GMM):** Yielding probabilistic certificates over semantically coherent clusters.
 *   **Empirical Safety Gap Analysis:** The framework exposes verifiable safety holes across three author-trained Guardrail Classifiers (BERT, GPT-2, and Llama-3.1-8B), demonstrating that despite high empirical metrics, these models lack deterministic safety guarantees under both optimal ($\tau^*$) and pessimistic ($\tau_{pess}$) thresholds.
 
-## Hardware & Data Requirements
-This repository is strictly focused on the **formal verification** of the classifiers; therefore, training scripts for the models are not included. To fully reproduce the verification experiments presented in the paper, the following computational resources and datasets are utilized:
-
-*   **Total Compute:** Approximately 4 GPU hours are required to run the full suite of verification experiments.
-*   **Hardware Specifications:**
-    *   **GPT-2 Verification:** 1x NVIDIA Tesla T4 GPU.
-    *   **BERT Verification:** 1x NVIDIA RTX 4090 GPU.
-    *   **Llama-3.1-8B Verification:** 2x NVIDIA GeForce RTX 5090 GPUs.
-*   **Datasets & Models:** The verification framework constructs and tests its geometric boundaries using a subset of the Toxigen dataset (10,100 total exchanges). The target models verified in this codebase are author-trained Guardrail Classifiers that were previously fine-tuned on the AEGIS 2.0 dataset.
-
 ---
 
 ## Installation & Setup
 ```bash
 pip install -r requirements.txt
 ```
+
+## ⚠️ Data Requirements for Verification
+The verification scripts (`src/deterministic_verification.py` and `src/verify_gmm.py`) are designed to certify a **specification of harm**. 
+
+To ensure valid results, the dataset provided via the `--dataset` argument for these two scripts **must contain only harmful samples**. These samples should align with the specific definition of "harm" established in your model's constitution (e.g., specific categories of bias, toxicity, or PII leakage).
+**Evaluation Scripts:** Note that the scripts in `src/evaluations/` *do* require a binary labeled dataset (both harmful and harmless) to calculate Precision/Recall.
 
 ## Execution Commands
 
@@ -124,7 +120,7 @@ python src/verify_gmm.py \
 
 **Output:**
 ```
-P(score > 0.37) = 0.9312
+P(score > 0.37) = 0.90
 ```
 
 ---
@@ -211,7 +207,7 @@ Accepts all arguments from the table above, plus:
 | Argument | Default | Choices | Description |
 |---|---|---|---|
 | `--n-components` / `-k` | `2` | any int | Number of GMM mixture components |
-| `--cov-type` | `diag` | `full`, `tied`, `diag`, `spherical` | GMM covariance structure; `diag` is recommended for high-dimensional embeddings |
+| `--cov-type` | `diag` | `full`, `diag` | GMM covariance structure; `diag` is recommended for high-dimensional embeddings |
 
 > Embeddings are cached identically to `eval_multiple_hyperrect.py` — cache files are shared across scripts for the same model/dataset/split/seed combination.
 
