@@ -1,11 +1,16 @@
 # Beyond Red-Teaming: Formal Guarantees of LLM Guardrail Classifiers
 
-This repository contains the official anonymized code and resources for the NeurIPS 2026 paper submission: *"Beyond Red-Teaming: Formal Guarantees of LLM Guardrail Classifiers"*. 
+This repository contains the official code and resources for the paper:
+**"Beyond Red-Teaming: Formal Guarantees of LLM Guardrail Classifiers"**
+
+**Authors:** Nikita Kezins (Delft University of Technology), Urbas Ekka, Pascal Berrang (University of Birmingham & Zeroth Research), Luca Arnaboldi (University of Birmingham & Zeroth Research)
+
+---
 
 ## Overview
-Guardrail Classifiers are used to defend production language models against harmful behavior, but their reliability has historically been heuristic, offering no formal guarantees. Standard verification methods struggle to scale due to the discrete nature of linguistic input space and the non-linear depth of Transformer architectures. 
+Guardrail Classifiers are used to defend production language models against harmful behavior, but their reliability has historically been heuristic, offering no formal guarantees. Standard verification methods struggle to scale due to the discrete nature of linguistic input space and the non-linear depth of Transformer architectures.
 
-This repository provides a framework that closes this gap by shifting verification from the discrete input space to the classifier's pre-activation space. By leveraging the monotonicity of the sigmoid classification head, we certify semantic regions of harmful behavior without approximation in $O(d)$ time. 
+This repository provides a framework that closes this gap by shifting verification from the discrete input space to the classifier's pre-activation space. By leveraging the monotonicity of the sigmoid classification head, we certify semantic regions of harmful behavior without approximation in $O(d)$ time.
 
 ## Key Contributions
 *   **Closed-Form Gap-Analysis Framework:** We provide a linear verification procedure that isolates the classification head on the last hidden state, avoiding the need to propagate bounds through the entire Transformer stack.
@@ -14,7 +19,6 @@ This repository provides a framework that closes this gap by shifting verificati
     *   **Multiple SVD-aligned Hyper-rectangles:** Utilizing HDBSCAN clustering to partition the space, yielding exact SAT/UNSAT certificates for localized sub-clusters of harm.
     *   **Gaussian Mixture Models (GMM):** Yielding probabilistic certificates over semantically coherent clusters.
 *   **Empirical Safety Gap Analysis:** The framework exposes verifiable safety holes across three author-trained Guardrail Classifiers (BERT, GPT-2, and Llama-3.1-8B), demonstrating that despite high empirical metrics, these models lack deterministic safety guarantees under both optimal ($\tau^*$) and pessimistic ($\tau_{pess}$) thresholds.
-
 ---
 
 ## Installation & Setup
@@ -182,7 +186,6 @@ Accepts all arguments from the table above, plus:
 |---|---|---|
 | `--min-cluster` | `6` | Minimum cluster size for HDBSCAN |
 
-> Embeddings are cached under `.embedding_cache/` after first extraction to avoid redundant forward passes across runs.
 
 ---
 
@@ -209,7 +212,6 @@ Accepts all arguments from the table above, plus:
 | `--n-components` / `-k` | `2` | any int | Number of GMM mixture components |
 | `--cov-type` | `diag` | `full`, `diag` | GMM covariance structure; `diag` is recommended for high-dimensional embeddings |
 
-> Embeddings are cached identically to `eval_multiple_hyperrect.py` — cache files are shared across scripts for the same model/dataset/split/seed combination.
 
 ---
 
@@ -235,3 +237,16 @@ Total                     91      109      45.5%
 ```
 
 **Precision** = fraction of inside-predictions that are truly harmful. **Recall** = fraction of harmful eval samples captured inside the region. **F1** is their harmonic mean.
+
+## Citation
+
+If you use this work, please cite:
+
+```bibtex
+@misc{kezins2026beyondredteaming,
+  title  = {Beyond Red-Teaming: Formal Guarantees of {LLM} Guardrail Classifiers},
+  author = {Kezins, Nikita and Ekka, Urbas and Berrang, Pascal and Arnaboldi, Luca},
+  year   = {2026},
+  note   = {Preprint}
+}
+```

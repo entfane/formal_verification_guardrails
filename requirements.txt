@@ -4,6 +4,4 @@ numpy
 pandas
 transformers
 scikit-learn
-sentence_transformers
-tensorflow
 accelerate
