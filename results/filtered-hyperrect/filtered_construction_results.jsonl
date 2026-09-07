@@ -1,0 +1,5 @@
+{"model": "entfane/gpt2_constitutional_classifier", "tau": 0.37, "kept": 8930, "total": 10000, "result": "SAT", "sigma_z_min": 7.562533351621636e-17}
+{"model": "entfane/gpt2_constitutional_classifier", "tau": 0.15, "kept": 9840, "total": 10000, "result": "SAT", "sigma_z_min": 1.313838623280358e-17}
+{"model": "urbas/bert_aegis", "tau": 0.48, "kept": 5577, "total": 10000, "result": "SAT", "sigma_z_min": 0.0020810747519135475}
+{"model": "urbas/bert_aegis", "tau": 0.13, "kept": 10000, "total": 10000, "result": "SAT", "sigma_z_min": 0.00021126825595274568}
+{"model": "entfane/Toxic_Llama8B", "tau": 0.8, "kept": 9134, "total": 10000, "result": "SAT", "sigma_z_min": 1.9034197033722368e-27}

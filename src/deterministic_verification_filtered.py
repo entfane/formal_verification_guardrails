@@ -1,4 +1,6 @@
 import argparse
+import json
+import numpy as np
 import torch.nn as nn
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from utils import load_align_mat
@@ -7,6 +9,22 @@ from verifier import Verifier
 from datasets import load_dataset
 import os
 
+RESULTS_PATH = "results/filtered-hyperrect/filtered_construction_results.jsonl"
+
+
+def log_result(model, threshold, n_kept, n_total, result, min_corner_score, results_path=RESULTS_PATH):
+    os.makedirs(os.path.dirname(results_path), exist_ok=True)
+    record = {
+        "model": model,
+        "tau": threshold,
+        "kept": n_kept,
+        "total": n_total,
+        "result": result,
+        "sigma_z_min": float(min_corner_score),
+    }
+    with open(results_path, "a", encoding="utf-8") as f:
+        f.write(json.dumps(record) + "\n")
+
 
 def get_classifier_head(model):
     linear_layers = [
@@ -14,18 +32,33 @@ def get_classifier_head(model):
         for name, module in model.named_modules()
         if isinstance(module, nn.Linear)
     ]
-    
+
     _, head = linear_layers[-1]
-    
+
     weights = head.weight
     bias = head.bias
-    
+
     return weights, bias
+
+
+def filter_by_classifier_score(embeddings, weights, bias, threshold):
+    """
+    Keep only the construction points the classifier itself already scores
+    at or above the threshold (i.e. sigma(z) >= threshold), so the
+    hyperrectangle is built exclusively from points the classifier gets right.
+    """
+    pre_sigm = embeddings @ weights
+    if bias is not None:
+        pre_sigm = pre_sigm + bias
+    scores = 1 / (1 + np.exp(-pre_sigm))
+    mask = scores >= threshold
+    return embeddings[mask], scores
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Verify classifier"
+        description="Verify classifier using a hyper-rectangle built only from "
+                    "construction points the classifier already scores >= threshold"
     )
     parser.add_argument(
         "--model", "-m",
@@ -90,7 +123,18 @@ if __name__ == "__main__":
     verifier = Verifier(POOLING)
     embeddings = verifier.extract_embeddings(dataset, classifier, tokenizer, POOLING, INPUT_COL, OUTPUT_COL, BATCH_SIZE, MAX_LEN)
 
-    
+    weights, bias = get_classifier_head(classifier)
+    weights = weights.squeeze().detach().cpu().float().numpy()
+    bias = bias.squeeze().detach().cpu().float().numpy() if bias is not None else None
+
+    n_before = len(embeddings)
+    embeddings, scores = filter_by_classifier_score(embeddings, weights, bias, THRESHOLD)
+    n_after = len(embeddings)
+    print(f"Construction set: {n_before} points -> {n_after} points scoring >= {THRESHOLD} "
+          f"(dropped {n_before - n_after})")
+    if n_after == 0:
+        raise ValueError(f"No construction points scored >= {THRESHOLD}; cannot build a hyper-rectangle.")
+
     if SINGLE_HYPER_RECTANGLE:
         align_mat  = load_align_mat(DATASET_NAME, HF_MODEL, embeddings, False)
         embeddings = embeddings @ align_mat
@@ -98,9 +142,6 @@ if __name__ == "__main__":
         hyperrectangles = [calculate_hyperrectangle(embeddings)]
     else:
         hyperrectangles, align_mat = compute_hyperrectangles(embeddings, min_cluster_size=MIN_CLUSTER)
-    weights, bias = get_classifier_head(classifier)
-    weights = weights.squeeze().detach().cpu().float().numpy()
-    bias = bias.squeeze().detach().cpu().float().numpy() if bias is not None else None
 
     result, min_corner_score = verifier.verify(hyperrectangles, weights, bias, THRESHOLD, align_mat)
     print(result)
@@ -109,3 +150,5 @@ if __name__ == "__main__":
         print(f"Everything inside the hyper-rectangle classified > {THRESHOLD}")
     else:
         print(f"There exists a point within the hyper-rectangle which is classified <= {THRESHOLD}")
+
+    log_result(HF_MODEL, THRESHOLD, n_after, n_before, result, min_corner_score)

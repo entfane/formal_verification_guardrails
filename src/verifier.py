@@ -62,8 +62,13 @@ class Verifier:
 
             
 
-    def verify(self, hyperrectangles: List, weights: np.ndarray, bias: float, threshold: float, align_matrices: List[np.ndarray]) -> str:
-
+    def verify(self, hyperrectangles: List, weights: np.ndarray, bias: float, threshold: float, align_matrices: List[np.ndarray]):
+        """
+        Returns (result, min_corner_score): min_corner_score is sigma(z_min), the
+        lowest score attainable at the analytic worst corner across all
+        hyperrectangles (the real corner score, not just the first SAT hit).
+        """
+        min_z = None
         for (hyperrectangle, align_mat) in zip(hyperrectangles, align_matrices):
             lo = hyperrectangle[:, 0]
             hi = hyperrectangle[:, 1]
@@ -73,7 +78,8 @@ class Verifier:
             if bias is not None:
                 pre_sigm += bias
             z = 1/(1 + np.exp(-pre_sigm))
-            if z <= threshold:
-                return self.SAT
-        
-        return self.UNSAT
+            if min_z is None or z < min_z:
+                min_z = z
+
+        result = self.SAT if min_z <= threshold else self.UNSAT
+        return result, min_z
