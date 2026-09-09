@@ -101,6 +101,11 @@ sm.set_array([])
 cbar = fig.colorbar(sm, ax=axes, orientation="vertical", fraction=0.025, pad=0.02)
 cbar.set_label(r"$\tau$")
 
+fig.text(0.5, -0.12,
+          "Each panel pools K = 1-5 mixture components (both FULL and DIAG); "
+          "per-tau spread reflects variation across K, not a separate series.",
+          ha="center", fontsize=8, style="italic", color="dimgray")
+
 # ── save ─────────────────────────────────────────────────────────────────────
 
 pdf_path = "results/plots/gmm_calibration.pdf"
